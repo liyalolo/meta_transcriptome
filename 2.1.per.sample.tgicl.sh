@@ -25,4 +25,20 @@ echo This-work-is-completed! 1>&2 && \
 echo This-work-is-completed! > /Disk04/Project/Micro/liyanli/A552_BeeMetaTranscriptome/test/Result/Cluster/TGICL/A1/cluster_A1.sh.sign
 
 
+##########
+#steps: 
+         #/System/software/phrap-1.080812/bin/phrap CL1 -minmatch 35 -minscore 35 -repeat_stringency 0.95 -new_ace
+         #generate alignment,asm_*/ folders, including ACE, singlets, align, contigs, err_log, log_std
+         #cat asm_*/align >align etc
+         #use phrap.id.list.pl script to generate files:align.cluster, align.perfect, align.perfect.single
+         #generate single.perfect.fa, and contig fasta
+         #formatdb index tgicl_cluster_and_single.fa
+         #blastall -d tgicl_cluster_and_single.fa -q tgicl_cluster_and_single.fa
+         #cluster for coverage filter, including solar by liheng, sorting m8 file
+         #getUnigene.pl
+#CROSS_MATCH
+#Phrap
+#CAP 组装
+
+
 
