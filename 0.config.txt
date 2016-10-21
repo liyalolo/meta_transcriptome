@@ -1,0 +1,121 @@
+
+project_id =  A577
+project_name = A577_160412scaTD
+
+Filter_method = Soapnuke
+## 1. filter parameter for soapnuke ####
+# filter for RNA sequence
+##  -l low quality threshold ####
+## -q low quality rate ##
+## -n  N rate threshold ##
+##  -p filter poly A, percent of A, 0 means do not filter
+# -i remove index
+# -c the read number you want to keep in each clean fq file, for PE reads
+# --seqType sequence type 0 for old,1 for new
+#  -f, --adapter1  : <s> 3' adapter sequence or adapter list file of fq1 file
+#  -r, --adapter2  : <s> 5' adapter sequence or adapter list file of fq2 file [only for PE reads]
+# -Q  quality system 1:illumina, 2:sanger
+#-G, --sanger    : <b> set clean data qualtiy system to sanger (default: illumina)
+Soapnuke_opt = filter -l 10 -q 0.5 -n 0.05 -p 1  -i -c 50   -Q 2 --seqType 1 -f GATCGGAAGAGCACACGTCTGAACTCCAGTCAC -r ACACTCTTTCCCTACACGACGCTCTTCCGATC
+
+Assemble_method=Trinity
+# -cpu 24-->65G, 10--> 32G , 6 -->17G, [24]
+# -seqType fq or fa [fq]
+#-min_contig_length: [100]
+#-min_glue: [3]
+#-group_pairs_distance: [250]
+#-path_reinforcement_distance: [85]
+#-bfly_opts: butter fly options [-V 5 --edge-thr=0.1 --stderr]
+#-min_kmer_cov: [3]
+Trinity_opt = -cpu 24 -seqType fq -min_contig_length 100  -min_glue 3 -group_pairs_distance 250 -path_reinforcement_distance 85 -bfly_opts  ' -V 5 --edge-thr=0.1 --stderr ' -min_kmer_cov 3
+
+#### cluster method ###
+Cluster_method = tgicl,pheatmap
+#  -l miminum overlap length (default 40)
+# -c : use the specified number of CPUs on local machine
+#  -v maximum length of unmatched overhangs (default 30)
+  -O use given 'phrap_options' instead of the default ones
+Tgicl_opt = -l 40 -c 10 -v 20  -phrap  ' -minmatch 35 -minscore 35  -repeat_stringency 0.95 '
+
+### -sample sample cluster ##
+### -diff different value cluster ##
+## -inter
+## -union
+#Pheatmap_opt = -sample -diff  -inter -union -cluster 'A1-vs-A2,A1-vs-A3,T1-vs-T2,T1-vs-T3;A-vs-T' -group 'A:A1,A2,A3;T:T1,T2,T3'
+Pheatmap_opt = -sample -diff  -inter -union -cluster 'PyFemale-vs-PyMale'
+
+Isoform_method = RSEM
+### 4 transcript level expression level ####
+## --strand-specific
+Rsem_opt =  --phred64-quals --paired-end  --num-threads 5  --samtools-sort-mem 4G
+
+### annotation ####
+#-species: the species to annot, animal plant, fungi
+#-db: the database to annotation, e.g.: cog,kegg,nr,nt,swissprot,pfam,other
+#-cog: path to cog database, [get from software]
+#-nr: path to nr database directory or file
+#-nr_class: sub class if -nr is a directory, one of follows: nr,animal,Bacteria,Environmental.samples,fungi,Invertebrates,Mammals,microorganism,Phages,Plants,Primates,Synthetic,Vertebrates,Viruses
+#-blast2go:  blast2go analysis flag
+#-nt: path to nt database directory or file
+#-nt_class: sub class if -nt is a directory, one of follows: nt,animal,fungi,Plants,Bacteria,Phages,Primates,Synthetic,Vertebrates,Viruses
+#-ntf: nt blast output format, [-m 0]
+#-kegg: path to kegg database directory or file
+#-kegg_clss: sub class if -kegg is a directory, one of follows: kegg,animal,fungi,microorganism,plant,prokaryote
+#-pathway: pathway analysis flag
+#-komap: the path to komap file, if not set, will get from kegg_class
+#-swissprot: path to swissprot diectory or file.
+#-swsprot_class: sub class if -swissprot is a directory, one of follows: uniprot_sprot,Animal,Archaea,Bacteria,Fungi,Invertebrates,Mammals,Plants,Rodents,Vertebrates,Viruses
+#-pfam
+#-other: path to other database, must be format
+#-cds: get the CDS information for the input reference.
+#-opts: the blast option, note nr must m7 format, not set.
+#Annot_opt = -db cog,kegg,nr,nt,swissprot -nr_class Plants -nt_class Plants -kegg_class plant -swsprot_class Plants -opts ' -e  1e-5  -F  F -a 10 -m 8 '  -pathway -blast2go -cds -komap /Database/kegg/RNA/59.3/komap/animal_ko_map.tab
+Annot_opt = -species animal -db cog,kegg,nr,nt,swissprot -opts ' -e  1e-5  -F  F -a 10 -m 8 '  -pathway -blast2go -cds
+
+### CDS ##
+Cds_method=ESTscan
+
+Snp_method = GATK
+### 11 SNP for GATK #####
+## -mindepth: min depth for variant
+## -mindist: min distance between two variant
+## -allele_fre: min allele frequency
+Gatk_opt = -mindepth 4 -mindist 5  -stand_call_conf 20.0 -stand_emit_conf 20.0 -allele_fre 0
+
+### SSR ###
+Ssr_opt = 1-12,2-6,3-5,4-5,5-4,6-4 100 150
+
+Diff_method = DEGseq
+## 5 diff DEGseq: sample without replication; DESeq2: sample with replication ###
+Degseq_opt = -control PyFemale -treat PyMale
+#Deseq_opt = -controlgroup 'A:A1,A2,A3&B:B1,B2,B3'  -treatgroup 'B:B1,B2,B3&C:C1,C2,C3'
+#Deseq_opt = -controlgroup 'A:A1,A2,A3'  -treatgroup 'T:T1,T2,T3'
+
+## 6 enrichment analysis ########
+## -a the path with prefix to the gene annotation file *.annot,*.ko
+#-m /Database/kegg/RNA/59.3/ko_map.tab
+Enrich_opt =  -c /Database/go/RNA/current/go.class -m /Database/kegg/RNA/59.3/komap/animal_ko_map.tab
+
+### TF ###
+##-s:  the species for analysis, one of: animal,plant,fungi
+#-e:  the expression file.
+#-n: the gtf,gff,psl format gene CDS annotation file, e.g.: the three colmun must contain the CDS in gtf and gff.
+#-t : the type of input annotation file(gtf,gff,psl), CDS or EXON
+# -r:  the strand information to consider for CDS prediction, 0: no consider strand, 1: +, 2:-. [0]
+#-g: the fasta format genome file.
+#-i: the input fasta format sequence file. delimed by ','
+#-p: the type of input sequence file: T - protein, F - nucleotide
+#-opt: the option for hmmsearch. [ --domE  4 --cpu 6 ]
+#-v the evalue to hmmsearch result filtering cutoff  [0.0001]
+Tf_opt = -s plant -v 0.0001 -opt ' --domT 4 -cpu 6 '
+
+##### 15.FASTQ path #####
+KeyName=PyMale
+q1=/Disk04/Project/RNA/denovo/A577/data/PyMale_HNG7KCCXX_L1_1.fq.gz
+q2=/Disk04/Project/RNA/denovo/A577/data/PyMale_HNG7KCCXX_L1_2.fq.gz
+
+KeyName=PyFemale
+q1=/Disk04/Project/RNA/denovo/A577/data/PyFemale_HNG7KCCXX_L1_1.fq.gz
+q2=/Disk04/Project/RNA/denovo/A577/data/PyFemale_HNG7KCCXX_L1_2.fq.gz
+
+
